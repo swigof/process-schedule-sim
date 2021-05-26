@@ -11,19 +11,22 @@ import java.util.Scanner;
  */
 public class main {
     public static void main(String args[]){
-        ArrayList<String> input = getInput();
-        if(input == null){
-            System.out.println("ERROR - no input");
+        if(args.length == 0) {
+            System.out.println("ERROR - no input provided");
             System.exit(0);
         }
 
-        int cpuCount = Integer.parseInt(input.get(0).substring(11));
-
+        ArrayList<String> input = getInput(args[0]);
         Process[] processes = getProcesses(input);
 
+        int cpuCount = 0;
         int q = 0;
         Scanner scanIn = new Scanner(System.in);
-        while(q <= 0) {
+        while (cpuCount <= 0) {
+            System.out.print("Enter non-zero positive integer for cpu count: ");
+            cpuCount = scanIn.nextInt();
+        }
+        while (q <= 0) {
             System.out.print("Enter non-zero positive integer for round robin quantum: ");
             q = scanIn.nextInt();
         }
@@ -39,11 +42,11 @@ public class main {
      * Retrieve process file contents as a list of lines
      * @return a list of string for each line in the file
      */
-    static ArrayList<String> getInput(){
+    static ArrayList<String> getInput(String filepath){
         ArrayList<String> input = null;
         try
         {
-            Scanner file = new Scanner(new FileInputStream("./src/input.txt"));
+            Scanner file = new Scanner(new FileInputStream(filepath));
             input = new ArrayList<String>();
             while(file.hasNext()){
                 input.add(file.nextLine());
@@ -65,14 +68,13 @@ public class main {
      */
     static Process[] getProcesses(ArrayList<String> input){
         ArrayList<Process> processes = new ArrayList<Process>();
-        for(int i = 4; i < input.size(); i++){
-            String[] properties = input.get(i).split("\t", 4);
+        for (String s : input) {
+            String[] properties = s.split("\t", 4);
             Process p;
-            if(properties.length < 4){
+            if (properties.length < 4) {
                 int[] noIo = new int[0];
                 p = new Process(properties[0], Integer.parseInt(properties[1]), Integer.parseInt(properties[2]), noIo);
-            }
-            else{
+            } else {
                 int[] ioTimes = Arrays.stream(properties[3].split("\t")).mapToInt(Integer::parseInt).toArray();
                 p = new Process(properties[0], Integer.parseInt(properties[1]), Integer.parseInt(properties[2]), ioTimes);
             }
@@ -450,11 +452,11 @@ public class main {
         if(readyStr.equals(""))
             readyStr = "-";
         else if(readyStr.length() > 10)
-            readyStr = readyStr.substring(0, 9)+"\u2026";
+            readyStr = readyStr.substring(0, 7)+"...";
         if(ioStr.equals(""))
             ioStr = "-";
         else if(ioStr.length() > 10)
-            ioStr = ioStr.substring(0, 9)+"\u2026";
+            ioStr = ioStr.substring(0, 7)+"...";
         System.out.printf("%-10s|", readyStr);
         System.out.printf("%-10s|\n", ioStr);
     }
@@ -486,8 +488,12 @@ public class main {
         double avgTurnaround = (double)totalTurnaroundTime/processes.length;
         double avgResponse = (double)totalResponseTime/processes.length;
         double throughput = (double)processes.length/cycle;
-        System.out.printf("\nCPUUtilization: %.2f\tAverageWaitTime: %.2f\tAverageTurnaroundTime: %.2f" +
-                        "\tAverageResponseTime: %.2f\tThroughput: %.2f\n\n\n",
+        System.out.printf("""
+
+                        CPUUtilization: %.2f\tAverageWaitTime: %.2f\tAverageTurnaroundTime: %.2f\tAverageResponseTime: %.2f\tThroughput: %.2f
+
+
+                        """,
                         utilization, avgWait, avgTurnaround, avgResponse, throughput);
     }
 }
