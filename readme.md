@@ -1,4 +1,4 @@
-COMP 346 - Operating Systems
+Operating Systems
 
 Simple processor scheduling algorithm simulator
 
